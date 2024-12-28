@@ -3,7 +3,7 @@
  * @brief Digital output: Blinking an led
  * @copyright UMPSA ROBOTICS
  * @author LOO HUI KIE
- * @date
+ * @date 28/12/2024
  **/
 #include <Arduino.h>
 
@@ -29,8 +29,6 @@ void setup() {
 }
 
 void loop() {
-    blinking_led_1();
-    blinking_led_2();
     blinking_led_3();
 }
 
@@ -44,6 +42,9 @@ void blinking_led_1() {
         delay(short_delay);
         digitalWrite(LED1, LOW);
         delay(short_delay);
+    }
+    while(1){
+
     }
 }
 
@@ -60,6 +61,9 @@ void blinking_led_2() {
 
         count++; // Increment count
     } while (count < 5);
+    while(1){
+
+    }
 }
 
 void blinking_led_3() {
@@ -75,6 +79,7 @@ void blinking_led_3() {
 
         count++; // Increment count
     }
+    while(1){
+
+    }
 }
-
-
