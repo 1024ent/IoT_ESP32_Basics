@@ -15,7 +15,7 @@
  *
  * @copyright UMPSA ROBOTICS
  * @author LOO HUI KIE
- * @date
+ * @date 29/12/2024
  **/
 #include <Arduino.h>
 
@@ -28,7 +28,7 @@ void handleAnalogInput();   // Handles analog input from LDR sensor
 #define LONG_DELAY  10000
 
 // Define pin numbers for LEDs and LDR
-constexpr int LED1_PIN = 13;  // Pin for LED 1
+constexpr int LED1_PIN = 14;  // Pin for LED 1
 constexpr int LED2_PIN = 12;  // Pin for LED 2
 constexpr int LDR1_PIN = 35;  // Pin for LDR input
 
@@ -58,7 +58,7 @@ void handleAnalogInput() {
     Serial.println(ldrValue);
 
     // Control LED 1 based on light intensity
-    if (ldrValue < 300) {
+    if (ldrValue < 2000) {
         // If light intensity is low (below 300), turn on LED 1
         digitalWrite(LED1_PIN, HIGH);
     } else {
