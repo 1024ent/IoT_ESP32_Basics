@@ -1,18 +1,18 @@
 /**
- * @file example_2
+ * @file example_3
  * @brief Demonstrates controlling LED brightness using DAC and PWM.
  * @details This program changing an LED brightness using two methods: 
  *          - **DAC (Digital-to-Analog Converter)** for true analog output,
  *          - **PWM (Pulse Width Modulation)** to simulate analog behavior by adjusting the duty cycle.
  * @copyright UMPSA ROBOTICS
  * @author Loo Hui Kie
- * @date [Insert Date Here]
+ * @date 29/12/2024
  */
 #include <Arduino.h>
 
 // Pin definitions
-static const int DAC_PIN = 13;   // DAC Pin (for true analog output)
 static const int PWM_PIN = 12;   // PWM Pin (for simulated analog output)
+static const int DAC_PIN = 25;   // DAC Pin (for true analog output)
 
 // PWM settings
 const int pwmChannel = 0;       // PWM channel (0-15)
