@@ -3,7 +3,7 @@
  * @brief Digital output: Blinking an led changing the delay using serial monitor
  * @copyright UMPSA ROBOTICS
  * @author LOO HUI KIE
- * @date
+ * @date 28/12/2024
  **/
 #include <Arduino.h>
 

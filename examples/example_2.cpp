@@ -6,12 +6,12 @@
  *          - **PWM (Pulse Width Modulation)** to simulate analog behavior by adjusting the duty cycle.
  * @copyright UMPSA ROBOTICS
  * @author Loo Hui Kie
- * @date [Insert Date Here]
+ * @date 28/12/2024
  */
 #include <Arduino.h>
 
 // Define pin numbers
-constexpr int DAC_PIN = 13; // GPIO for DAC
+constexpr int DAC_PIN = 25; // GPIO for DAC
 constexpr int PWM_PIN = 12; // GPIO for PWM
 
 // Define PWM properties
@@ -26,6 +26,7 @@ constexpr int LONG_DELAY = 1000; // Longer delay between functions
 // Function prototypes
 void Fade_LED_DAC();
 void Fade_LED_PWM();
+void Smooth_Fade_LED_PWM();
 
 void setup() {
     // Initialize serial communication for debugging
@@ -41,10 +42,7 @@ void setup() {
 }
 
 void loop() {
-    Fade_LED_DAC();  // Fade using DAC
-    delay(LONG_DELAY);
-    Fade_LED_PWM();  // Fade using PWM
-    delay(LONG_DELAY);
+    Smooth_Fade_LED_PWM();  // Fade using 
 }
 
 // Function for fading LED using DAC
@@ -78,5 +76,30 @@ void Fade_LED_PWM() {
     for (int dutyCycle = 255; dutyCycle >= 0; dutyCycle--) {
         ledcWrite(pwmChannel, dutyCycle); // Set PWM duty cycle
         delay(SHORT_DELAY);               // Small delay for fade effect
+    }
+}
+
+// Gamma Correct Function
+int gammaCorrect(int value) {
+    float gamma = 2.2; // Common gamma value
+    return pow((float)value / 255.0, gamma) * 255.0;
+}
+
+// Function for fading LED using PWM with gamma correction
+void Smooth_Fade_LED_PWM(){
+    Serial.println("Starting LED fade using PWM with gamma correction...");
+
+    // Gradually increase the LED brightness
+    for (int dutyCycle = 0; dutyCycle <= 255; dutyCycle++) {
+        int correctedDuty = gammaCorrect(dutyCycle); // Apply gamma correction
+        ledcWrite(pwmChannel, correctedDuty);        // Set PWM duty cycle
+        delay(SHORT_DELAY);                          // Small delay for fade effect
+    }
+
+    // Gradually decrease the LED brightness
+    for (int dutyCycle = 255; dutyCycle >= 0; dutyCycle--) {
+        int correctedDuty = gammaCorrect(dutyCycle); // Apply gamma correction
+        ledcWrite(pwmChannel, correctedDuty);        // Set PWM duty cycle
+        delay(SHORT_DELAY);                          // Small delay for fade effect
     }
 }

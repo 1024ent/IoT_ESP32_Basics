@@ -1,84 +1,105 @@
 /**
- * @file example_1
- * @brief Digital output: Blinking an led changing the delay using serial monitor
+ * @file example_2
+ * @brief Demonstrates controlling LED brightness using DAC and PWM.
+ * @details This program fades an LED in and out using two methods: 
+ *          - **DAC (Digital-to-Analog Converter)** for true analog output,
+ *          - **PWM (Pulse Width Modulation)** to simulate analog behavior by adjusting the duty cycle.
  * @copyright UMPSA ROBOTICS
- * @author LOO HUI KIE
- * @date
- **/
+ * @author Loo Hui Kie
+ * @date 28/12/2024
+ */
 #include <Arduino.h>
 
-// Define the function
-void Serial_LED_Control();
+// Define pin numbers
+constexpr int DAC_PIN = 25; // GPIO for DAC
+constexpr int PWM_PIN = 12; // GPIO for PWM
 
-// Define pin numbers 
-static const int LED1 = 13;
-static const int LED2 = 12;
-static const int LED3 = 14;
+// Define PWM properties
+constexpr int pwmChannel = 0;       // PWM channel (0-15)
+constexpr int pwmFrequency = 5000;  // Frequency in Hz
+constexpr int pwmResolution = 8;    // Resolution in bits (8 = 0-255)
 
-// Define variables
-int pin = 0;                // Store the currently selected LED pin
-int delayDuration = 1000;   // Default delay duration in milliseconds
+// Define delays in milliseconds
+constexpr int SHORT_DELAY = 10;  // Small delay for fade effect
+constexpr int LONG_DELAY = 1000; // Longer delay between functions
+
+// Function prototypes
+void Fade_LED_DAC();
+void Fade_LED_PWM();
+void Smooth_Fade_LED_PWM();
 
 void setup() {
-    pinMode(LED1, OUTPUT);
-    pinMode(LED2, OUTPUT);
-    pinMode(LED3, OUTPUT);
+    // Initialize serial communication for debugging
     Serial.begin(115200);
-    Serial.println("System Initialized. Waiting for commands...");
+
+    // Configure LED PWM functionality
+    ledcSetup(pwmChannel, pwmFrequency, pwmResolution);
+
+    // Attach the LED pin to the PWM channel
+    ledcAttachPin(PWM_PIN, pwmChannel);
+
+    Serial.println("...Starting Your Program...");
 }
 
 void loop() {
-    Serial_LED_Control();
+    Smooth_Fade_LED_PWM();  // Fade using 
 }
 
-// Function
-void Serial_LED_Control() {
-    if (Serial.available()) {
-        // Prompt for LED number
-        Serial.println("Please enter the LED number (1-3) to turn on:");
-        while (!Serial.available()); // Wait for input
-        String ledInput = Serial.readStringUntil('\n');
-        int ledNumber = ledInput.toInt();
+// Function for fading LED using DAC
+void Fade_LED_DAC() {
+    Serial.println("Starting LED fade using DAC...");
 
-        // Validate LED number and set the pin
-        if (ledNumber == 1) pin = LED1;
-        else if (ledNumber == 2) pin = LED2;
-        else if (ledNumber == 3) pin = LED3;
-        else {
-            Serial.println("Invalid LED number. Please enter 1, 2, or 3.");
-            return;
-        }
+    // Gradually increase the LED brightness
+    for (int i = 0; i <= 255; i++) {
+        dacWrite(DAC_PIN, i);       // Write the value to DAC pin
+        delay(SHORT_DELAY);         // Small delay to see the fade effect
+    }
 
-        // Turn on the selected LED
-        digitalWrite(pin, HIGH);
-        Serial.print("LED ");
-        Serial.print(ledNumber);
-        Serial.println(" turned on.");
+    // Gradually decrease the LED brightness
+    for (int i = 255; i >= 0; i--) {
+        dacWrite(DAC_PIN, i);       // Write the value to DAC pin
+        delay(SHORT_DELAY);         // Small delay to see the fade effect
+    }
+}
 
-        // Prompt for delay duration
-        Serial.println("Please enter the delay duration (in milliseconds):");
-        while (!Serial.available()); // Wait for input
-        String delayInput = Serial.readStringUntil('\n');
-        int newDelayDuration = delayInput.toInt();
+// Function for fading LED using PWM
+void Fade_LED_PWM() {
+    Serial.println("Starting LED fade using PWM...");
 
-        if (newDelayDuration <= 0) {
-            Serial.println("Invalid delay duration. Please enter a positive number.");
-            return;
-        }
+    // Gradually increase the LED brightness
+    for (int dutyCycle = 0; dutyCycle <= 255; dutyCycle++) {
+        ledcWrite(pwmChannel, dutyCycle); // Set PWM duty cycle
+        delay(SHORT_DELAY);               // Small delay for fade effect
+    }
 
-        // Update delay duration
-        delayDuration = newDelayDuration;
-        Serial.print("Delay duration changed to ");
-        Serial.print(delayDuration);
-        Serial.println(" milliseconds.");
+    // Gradually decrease the LED brightness
+    for (int dutyCycle = 255; dutyCycle >= 0; dutyCycle--) {
+        ledcWrite(pwmChannel, dutyCycle); // Set PWM duty cycle
+        delay(SHORT_DELAY);               // Small delay for fade effect
+    }
+}
 
-        while(1){
-            // Blink the LED
-            Serial.println("Blinking the selected LED...");
-            digitalWrite(pin, HIGH);
-            delay(delayDuration);
-            digitalWrite(pin, LOW);
-            delay(delayDuration);            
-        }
+// Gamma Correct Function
+int gammaCorrect(int value) {
+    float gamma = 2.2; // Common gamma value
+    return pow((float)value / 255.0, gamma) * 255.0;
+}
+
+// Function for fading LED using PWM with gamma correction
+void Smooth_Fade_LED_PWM(){
+    Serial.println("Starting LED fade using PWM with gamma correction...");
+
+    // Gradually increase the LED brightness
+    for (int dutyCycle = 0; dutyCycle <= 255; dutyCycle++) {
+        int correctedDuty = gammaCorrect(dutyCycle); // Apply gamma correction
+        ledcWrite(pwmChannel, correctedDuty);        // Set PWM duty cycle
+        delay(SHORT_DELAY);                          // Small delay for fade effect
+    }
+
+    // Gradually decrease the LED brightness
+    for (int dutyCycle = 255; dutyCycle >= 0; dutyCycle--) {
+        int correctedDuty = gammaCorrect(dutyCycle); // Apply gamma correction
+        ledcWrite(pwmChannel, correctedDuty);        // Set PWM duty cycle
+        delay(SHORT_DELAY);                          // Small delay for fade effect
     }
 }
