@@ -17,52 +17,48 @@
 #include <Arduino.h>
 
 // Function declarations
-void handleDigitalInput(); // Handles digital input for LED control
+void digital_input_example();  // Handles digital input for LED control
 
 // Define constants for delays
-#define SHORT_DELAY 1000
-#define MID_DELAY   5000
-#define LONG_DELAY  10000
+#define short_delay pdMS_TO_TICKS(1000)
+#define mid_delay pdMS_TO_TICKS(5000)
+#define long_delay pdMS_TO_TICKS(10000)
 
-// Define pin numbers for LEDs and switch
-constexpr int LED1_PIN = 13;  // Pin for LED 1
-constexpr int LED2_PIN = 12;  // Pin for LED 2
-constexpr int SW1_PIN = 35;   // Pin for switch input
+// Define pin numbers for LEDs, switch, and LDR
+constexpr int led1_pin = 14;  // LED 1 pin
+constexpr int led2_pin = 12;  // LED 2 pin
+constexpr int switch_pin = 13; // Switch input pin
 
-// Global variable to store the switch state
-int switchState = 0;
+// Define variables
+int switch_state = 0;  // Variable to store the state of the switch
 
 void setup() {
-    // Configure pin modes
-    pinMode(LED1_PIN, OUTPUT);  // Set LED 1 pin as output
-    pinMode(LED2_PIN, OUTPUT);  // Set LED 2 pin as output
-    pinMode(SW1_PIN, INPUT);    // Set switch pin as input
+    // Set pin modes for LEDs, switch, and LDR
+    pinMode(led1_pin, OUTPUT);   // Set LED 1 as output
+    pinMode(led2_pin, OUTPUT);   // Set LED 2 as output
+    pinMode(switch_pin, INPUT);  // Set switch pin as input
 
-    // Initialize serial communication
+    // Start serial communication
     Serial.begin(115200);
-    delay(SHORT_DELAY); // Allow time for setup stabilization
 }
 
 void loop() {
-    // Continuously check and handle digital input
-    handleDigitalInput();
+    // Continuously check for user input
+    digital_input_example(); 
 }
 
-// Function to control LEDs based on the switch state
-void handleDigitalInput() {
-    // Read the state of the switch
-    switchState = digitalRead(SW1_PIN);
+// Function to handle digital input and control LEDs based on the switch state
+void digital_input_example() {
+    // Read the state of the switch pin
+    switch_state = digitalRead(switch_pin);
 
-    if (switchState == HIGH) {
-        // If the switch is pressed, turn on LED 1 and turn off LED 2
-        Serial.println("Switch is toggled ON!");
-        digitalWrite(LED1_PIN, HIGH);
-        digitalWrite(LED2_PIN, LOW);
+    // If the switch is pressed (HIGH), turn on LED 1 and off LED 2
+    if (switch_state == HIGH) {
+        digitalWrite(led1_pin, HIGH);
+        digitalWrite(led2_pin, LOW);
     } else {
-        // If the switch is not pressed, turn off LED 1 and turn on LED 2
-        Serial.println("Switch is toggled OFF!");
-        digitalWrite(LED1_PIN, LOW);
-        digitalWrite(LED2_PIN, HIGH);
+        // If the switch is not pressed (LOW), turn off LED 1 and turn on LED 2
+        digitalWrite(led1_pin, LOW);
+        digitalWrite(led2_pin, HIGH);
     }
 }
-
