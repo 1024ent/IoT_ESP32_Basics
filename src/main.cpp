@@ -8,84 +8,94 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include <WebServer.h>
+#include <FS.h>
+#include <SPIFFS.h>
 
-// Wi-Fi credentials
-const char* ssid = "Galaxy A33 5G CFB1";          // Wi-Fi network SSID
-const char* password = "txex0537";  // Wi-Fi network password
+const char* ssid = "Galaxy A33 5G CFB1";
+const char* password = "txex0537";
 
-// Set up the web server on port 80
 WebServer server(80);
 
-// Pin for controlling the LED
-constexpr int LED_PIN = 13; // Define LED pin as a constant for better readability
+constexpr int LED_PIN = 13;
+constexpr int PWM_CHANNEL = 0;
+constexpr int PWM_FREQUENCY = 5000;
+constexpr int PWM_RESOLUTION = 8;
 
-// Function declarations for handling HTTP requests
 void connectToWiFi();
 void handleRoot();
-void handleLEDOn();
-void handleLEDOff();
+void handleBrightness();
+void handleCSS();
+void handleJS();
 
-// Setup function: Initialize Serial, connect to Wi-Fi, and start the web server
 void setup() {
-  // Start serial communication for debugging
   Serial.begin(115200);
+  ledcSetup(PWM_CHANNEL, PWM_FREQUENCY, PWM_RESOLUTION);
+  ledcAttachPin(LED_PIN, PWM_CHANNEL);
 
-  // Initialize the LED pin as an output
-  pinMode(LED_PIN, OUTPUT);
-
-  // Connect to Wi-Fi network
   connectToWiFi();
 
-  // Set up HTTP routes for handling requests
-  server.on("/", HTTP_GET, handleRoot);                // Root endpoint to show a simple message
-  server.on("/led/on", HTTP_GET, handleLEDOn);   // LED ON endpoint
-  server.on("/led/off", HTTP_GET, handleLEDOff); // LED OFF endpoint
+  if (!SPIFFS.begin()) {
+    Serial.println("Failed to mount SPIFFS filesystem.");
+    return;
+  }
 
-  // Start the web server
+  server.on("/", HTTP_GET, handleRoot);
+  server.on("/style.css", HTTP_GET, handleCSS);
+  server.on("/script.js", HTTP_GET, handleJS);
+  server.on("/set_brightness", HTTP_GET, handleBrightness);
+
   server.begin();
   Serial.println("Server started!");
 }
 
-// Loop function: Continuously handle incoming client requests
 void loop() {
   server.handleClient();
 }
 
-// Function to connect to Wi-Fi
 void connectToWiFi() {
   WiFi.begin(ssid, password);
-
-  // Wait until the ESP32 is connected to Wi-Fi
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
   }
-
-  // Print the IP address once connected
   Serial.println("\nConnected to Wi-Fi!");
   Serial.print("IP Address: ");
   Serial.println(WiFi.localIP());
 }
 
-// Handle the root endpoint ("/")
 void handleRoot() {
-  String html = "<html><body><h1>ESP32 LED Control</h1>";
-  html += "<p><a href=\"/led/on\"><button>Turn ON LED</button></a></p>";
-  html += "<p><a href=\"/led/off\"><button>Turn OFF LED</button></a></p>";
-  html += "</body></html>";
-
-  // Send HTML content as response
-  server.send(200, "text/html", html);
+  File file = SPIFFS.open("/index.html", "r");
+  if (!file) {
+    server.send(500, "text/plain", "Failed to open index.html");
+    return;
+  }
+  server.streamFile(file, "text/html");
+  file.close();
 }
 
-// Handle the "/led/on" request
-void handleLEDOn() {
-  digitalWrite(LED_PIN, HIGH);  // Turn ON the LED
-  server.send(200, "text/plain", "LED is ON");
+void handleBrightness() {
+  String value = server.arg("value");
+  int brightness = constrain(value.toInt(), 0, 255);
+  ledcWrite(PWM_CHANNEL, brightness);
+  server.send(200, "text/plain", "Brightness set to: " + String(brightness));
 }
 
-// Handle the "/led/off" request
-void handleLEDOff() {
-  digitalWrite(LED_PIN, LOW);   // Turn OFF the LED
-  server.send(200, "text/plain", "LED is OFF");
+void handleCSS() {
+  File file = SPIFFS.open("/style.css", "r");
+  if (!file) {
+    server.send(500, "text/plain", "Failed to open style.css");
+    return;
+  }
+  server.streamFile(file, "text/css");
+  file.close();
+}
+
+void handleJS() {
+  File file = SPIFFS.open("/script.js", "r");
+  if (!file) {
+    server.send(500, "text/plain", "Failed to open script.js");
+    return;
+  }
+  server.streamFile(file, "application/javascript");
+  file.close();
 }

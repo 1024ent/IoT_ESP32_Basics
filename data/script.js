@@ -1,9 +1,9 @@
-document.getElementById('btnOn').addEventListener('click', () => sendRequest('on'));
-document.getElementById('btnOff').addEventListener('click', () => sendRequest('off'));
+// Function to update the brightness based on the slider value
+function updateBrightness() {
+    var slider = document.getElementById('brightnessSlider');
+    var value = slider.value;
+    document.getElementById('brightnessValue').innerText = value;
 
-function sendRequest(state) {
-  fetch(`/led/${state}`)
-    .then(response => response.text())
-    .then(data => console.log(data))
-    .catch(err => console.error('Error:', err));
+    // Send the value to ESP32 via a GET request
+    fetch('/set_brightness?value=' + value);
 }
