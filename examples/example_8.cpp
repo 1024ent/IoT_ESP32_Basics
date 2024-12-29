@@ -1,3 +1,10 @@
+/**
+ * @file main.cpp
+ * @brief Read the value of LDR sensor and display the value on a webpage.
+ * @copyright UMPSA ROBOTICS
+ * @author LOO HUI KIE
+ * @date 29/12/2024
+ **/
 #include <Arduino.h>
 #include <WiFi.h>
 #include <WebServer.h>
@@ -5,8 +12,8 @@
 #include <SPIFFS.h>
 
 // Wi-Fi credentials
-const char* ssid = "YourSSID";        // Wi-Fi network SSID
-const char* password = "YourPassword"; // Wi-Fi network password
+const char* ssid = "Galaxy A33 5G CFB1";        // Wi-Fi network SSID
+const char* password = "txex0537"; // Wi-Fi network password
 
 // Pin for LDR sensor (Analog pin)
 constexpr int LDR_PIN = 34;  // Connect LDR to pin 34 (analog input)
@@ -18,6 +25,8 @@ WebServer server(80);
 void connectToWiFi();
 void handleRoot();
 void handleLDRValue();
+void handleCSS();
+void handleJS();
 
 void setup() {
   Serial.begin(115200);
@@ -37,6 +46,8 @@ void setup() {
   // Set up HTTP routes for handling requests
   server.on("/", HTTP_GET, handleRoot);                // Root endpoint for the web page
   server.on("/ldr_value", HTTP_GET, handleLDRValue);    // Endpoint for getting LDR value
+  server.on("/style.css", HTTP_GET, handleCSS);
+  server.on("/script.js", HTTP_GET, handleJS);
 
   // Start the web server
   server.begin();
@@ -80,4 +91,24 @@ void handleLDRValue() {
 
   // Send the LDR value as a response
   server.send(200, "text/plain", String(ldrValue));
+}
+
+void handleCSS() {
+  File file = SPIFFS.open("/style.css", "r");
+  if (!file) {
+    server.send(500, "text/plain", "Failed to open style.css");
+    return;
+  }
+  server.streamFile(file, "text/css");
+  file.close();
+}
+
+void handleJS() {
+  File file = SPIFFS.open("/script.js", "r");
+  if (!file) {
+    server.send(500, "text/plain", "Failed to open script.js");
+    return;
+  }
+  server.streamFile(file, "application/javascript");
+  file.close();
 }

@@ -3,7 +3,7 @@
  * @brief Controls the brightness of an LED using PWM and a slider on a webpage.
  * @copyright UMPSA ROBOTICS
  * @author LOO HUI KIE
- * @date 
+ * @date 29/12/2024
  **/
 #include <Arduino.h>
 #include <WiFi.h>
