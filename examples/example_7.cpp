@@ -5,52 +5,45 @@
  * @author LOO HUI KIE
  * @date 
  **/
-
 #include <Arduino.h>
 #include <WiFi.h>
 #include <WebServer.h>
 #include <FS.h>
 #include <SPIFFS.h>
 
-// Wi-Fi credentials
-const char* ssid = "YourSSID";        // Wi-Fi network SSID
-const char* password = "YourPassword"; // Wi-Fi network password
+const char* ssid = "Galaxy A33 5G CFB1";
+const char* password = "txex0537";
 
-// Set up the web server on port 80
 WebServer server(80);
 
-// Pin for controlling the LED
-constexpr int LED_PIN = 13; // Define LED pin as a constant for better readability
-constexpr int PWM_CHANNEL = 0; // PWM channel for controlling brightness
-constexpr int PWM_FREQUENCY = 5000; // PWM frequency (5kHz)
-constexpr int PWM_RESOLUTION = 8; // PWM resolution (8-bit: 0-255)
+constexpr int LED_PIN = 13;
+constexpr int PWM_CHANNEL = 0;
+constexpr int PWM_FREQUENCY = 5000;
+constexpr int PWM_RESOLUTION = 8;
 
 void connectToWiFi();
 void handleRoot();
 void handleBrightness();
+void handleCSS();
+void handleJS();
 
 void setup() {
-  // Start serial communication for debugging
   Serial.begin(115200);
+  ledcSetup(PWM_CHANNEL, PWM_FREQUENCY, PWM_RESOLUTION);
+  ledcAttachPin(LED_PIN, PWM_CHANNEL);
 
-  // Initialize the LED pin for PWM output
-  ledcSetup(PWM_CHANNEL, PWM_FREQUENCY, PWM_RESOLUTION); // Set up PWM on the LED pin
-  ledcAttachPin(LED_PIN, PWM_CHANNEL); // Attach the LED pin to the PWM channel
-
-  // Connect to Wi-Fi network
   connectToWiFi();
 
-  // Initialize SPIFFS for file system access (HTML, JS, CSS)
   if (!SPIFFS.begin()) {
     Serial.println("Failed to mount SPIFFS filesystem.");
     return;
   }
 
-  // Set up HTTP routes for handling requests
-  server.on("/", HTTP_GET, handleRoot);                // Root endpoint for the web page
-  server.on("/set_brightness", HTTP_GET, handleBrightness); // Endpoint for setting brightness
+  server.on("/", HTTP_GET, handleRoot);
+  server.on("/style.css", HTTP_GET, handleCSS);
+  server.on("/script.js", HTTP_GET, handleJS);
+  server.on("/set_brightness", HTTP_GET, handleBrightness);
 
-  // Start the web server
   server.begin();
   Serial.println("Server started!");
 }
@@ -61,41 +54,48 @@ void loop() {
 
 void connectToWiFi() {
   WiFi.begin(ssid, password);
-
-  // Wait until the ESP32 is connected to Wi-Fi
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
   }
-
-  // Print the IP address once connected
   Serial.println("\nConnected to Wi-Fi!");
   Serial.print("IP Address: ");
   Serial.println(WiFi.localIP());
 }
 
 void handleRoot() {
-  // Serve the HTML file from SPIFFS
   File file = SPIFFS.open("/index.html", "r");
   if (!file) {
     server.send(500, "text/plain", "Failed to open index.html");
     return;
   }
-
   server.streamFile(file, "text/html");
   file.close();
 }
 
 void handleBrightness() {
-  // Get the brightness value from the query string
   String value = server.arg("value");
-
-  // Convert to integer and constrain to valid PWM range (0-255)
   int brightness = constrain(value.toInt(), 0, 255);
-
-  // Set the LED brightness using PWM
   ledcWrite(PWM_CHANNEL, brightness);
-
-  // Send the current brightness value back as a response
   server.send(200, "text/plain", "Brightness set to: " + String(brightness));
+}
+
+void handleCSS() {
+  File file = SPIFFS.open("/style.css", "r");
+  if (!file) {
+    server.send(500, "text/plain", "Failed to open style.css");
+    return;
+  }
+  server.streamFile(file, "text/css");
+  file.close();
+}
+
+void handleJS() {
+  File file = SPIFFS.open("/script.js", "r");
+  if (!file) {
+    server.send(500, "text/plain", "Failed to open script.js");
+    return;
+  }
+  server.streamFile(file, "application/javascript");
+  file.close();
 }

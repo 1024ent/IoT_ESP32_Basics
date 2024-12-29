@@ -1,6 +1,6 @@
 /**
  * @file example_1
- * @brief main esp32doit-devkit-v1
+ * @brief Turn an LED on and off on a webpage.
  * @copyright UMPSA ROBOTICS
  * @author LOO HUI KIE
  * @date 29/12/2024
