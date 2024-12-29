@@ -1,5 +1,5 @@
 /**
- * @file main.cpp
+ * @file example_7.cpp
  * @brief Controls the brightness of an LED using PWM and a slider on a webpage.
  * @copyright UMPSA ROBOTICS
  * @author LOO HUI KIE

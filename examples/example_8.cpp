@@ -1,5 +1,5 @@
 /**
- * @file main.cpp
+ * @file example_8.cpp
  * @brief Read the value of LDR sensor and display the value on a webpage.
  * @copyright UMPSA ROBOTICS
  * @author LOO HUI KIE

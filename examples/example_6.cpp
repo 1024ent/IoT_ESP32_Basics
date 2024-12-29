@@ -1,5 +1,5 @@
 /**
- * @file example_1
+ * @file example_6.cpp
  * @brief Turn an LED on and off on a webpage.
  * @copyright UMPSA ROBOTICS
  * @author LOO HUI KIE
