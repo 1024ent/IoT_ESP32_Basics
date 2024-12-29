@@ -6,51 +6,86 @@
  * @date - 
  **/
 #include <Arduino.h>
+#include <WiFi.h>
+#include <WebServer.h>
 
-// Function declarations
-void handleAnalogInput();   // Handles analog input from LDR sensor
+// Wi-Fi credentials
+const char* ssid = "Galaxy A33 5G CFB1";          // Wi-Fi network SSID
+const char* password = "txex0537";  // Wi-Fi network password
 
-// Define constants for delays
-#define SHORT_DELAY 1000
-#define MID_DELAY   5000
-#define LONG_DELAY  10000
+// Set up the web server on port 80
+WebServer server(80);
 
-// Define pin numbers for LEDs and LDR
-constexpr int LED1_PIN = 14;  // Pin for LED 1
-constexpr int LED2_PIN = 12;  // Pin for LED 2
-constexpr int LDR1_PIN = 35;  // Pin for LDR input
+// Pin for controlling the LED
+constexpr int LED_PIN = 13; // Define LED pin as a constant for better readability
 
+// Function declarations for handling HTTP requests
+void connectToWiFi();
+void handleRoot();
+void handleLEDOn();
+void handleLEDOff();
+
+// Setup function: Initialize Serial, connect to Wi-Fi, and start the web server
 void setup() {
-    // Set pin modes for LEDs and LDR
-    pinMode(LED1_PIN, OUTPUT);  // Set LED 1 pin as output
-    pinMode(LED2_PIN, OUTPUT);  // Set LED 2 pin as output
-    pinMode(LDR1_PIN, INPUT);   // Set LDR pin as input
+  // Start serial communication for debugging
+  Serial.begin(115200);
 
-    // Start serial communication
-    Serial.begin(115200);
-    delay(SHORT_DELAY);  // Short delay before starting
+  // Initialize the LED pin as an output
+  pinMode(LED_PIN, OUTPUT);
+
+  // Connect to Wi-Fi network
+  connectToWiFi();
+
+  // Set up HTTP routes for handling requests
+  server.on("/", HTTP_GET, handleRoot);                // Root endpoint to show a simple message
+  server.on("/led/on", HTTP_GET, handleLEDOn);   // LED ON endpoint
+  server.on("/led/off", HTTP_GET, handleLEDOff); // LED OFF endpoint
+
+  // Start the web server
+  server.begin();
+  Serial.println("Server started!");
 }
 
+// Loop function: Continuously handle incoming client requests
 void loop() {
-    // Continuously monitor the LDR and control LEDs
-    handleAnalogInput();
+  server.handleClient();
 }
 
-// Function to handle analog input from the LDR (Light Dependent Resistor)
-void handleAnalogInput() {
-    // Read the LDR value (light intensity)
-    int ldrValue = analogRead(LDR1_PIN);
-    
-    // Log the LDR value to the Serial Monitor
-    Serial.print("LDR value: ");
-    Serial.println(ldrValue);
+// Function to connect to Wi-Fi
+void connectToWiFi() {
+  WiFi.begin(ssid, password);
 
-    // Control LED 1 based on light intensity
-    if (ldrValue < 2000) {
-        // If light intensity is low (below 300), turn on LED 1
-        digitalWrite(LED1_PIN, HIGH);
-    } else {
-        // If light intensity is high (300 or more), turn off LED 1
-        digitalWrite(LED1_PIN, LOW);
-    }
+  // Wait until the ESP32 is connected to Wi-Fi
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+
+  // Print the IP address once connected
+  Serial.println("\nConnected to Wi-Fi!");
+  Serial.print("IP Address: ");
+  Serial.println(WiFi.localIP());
+}
+
+// Handle the root endpoint ("/")
+void handleRoot() {
+  String html = "<html><body><h1>ESP32 LED Control</h1>";
+  html += "<p><a href=\"/led/on\"><button>Turn ON LED</button></a></p>";
+  html += "<p><a href=\"/led/off\"><button>Turn OFF LED</button></a></p>";
+  html += "</body></html>";
+
+  // Send HTML content as response
+  server.send(200, "text/html", html);
+}
+
+// Handle the "/led/on" request
+void handleLEDOn() {
+  digitalWrite(LED_PIN, HIGH);  // Turn ON the LED
+  server.send(200, "text/plain", "LED is ON");
+}
+
+// Handle the "/led/off" request
+void handleLEDOff() {
+  digitalWrite(LED_PIN, LOW);   // Turn OFF the LED
+  server.send(200, "text/plain", "LED is OFF");
 }

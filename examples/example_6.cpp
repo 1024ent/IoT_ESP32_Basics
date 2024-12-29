@@ -1,19 +1,17 @@
 /**
- * @file example_6.cpp
- * @brief Controls an LED using an ESP32 web server with ON/OFF buttons.
- * @description This sketch creates a simple web server running on ESP32 that controls an LED using HTTP requests.
+ * @file example_1
+ * @brief main esp32doit-devkit-v1
  * @copyright UMPSA ROBOTICS
  * @author LOO HUI KIE
- * @date 
+ * @date 29/12/2024
  **/
-
 #include <Arduino.h>
 #include <WiFi.h>
 #include <WebServer.h>
 
 // Wi-Fi credentials
-const char* ssid = "YourSSID";        // Wi-Fi network SSID
-const char* password = "YourPassword"; // Wi-Fi network password
+const char* ssid = "Galaxy A33 5G CFB1";          // Wi-Fi network SSID
+const char* password = "txex0537";  // Wi-Fi network password
 
 // Set up the web server on port 80
 WebServer server(80);
@@ -22,8 +20,10 @@ WebServer server(80);
 constexpr int LED_PIN = 13; // Define LED pin as a constant for better readability
 
 // Function declarations for handling HTTP requests
+void connectToWiFi();
 void handleRoot();
-void handleLED();
+void handleLEDOn();
+void handleLEDOff();
 
 // Setup function: Initialize Serial, connect to Wi-Fi, and start the web server
 void setup() {
@@ -38,7 +38,8 @@ void setup() {
 
   // Set up HTTP routes for handling requests
   server.on("/", HTTP_GET, handleRoot);                // Root endpoint to show a simple message
-  server.on("/led/{state}", HTTP_GET, handleLED);       // LED control endpoint
+  server.on("/led/on", HTTP_GET, handleLEDOn);   // LED ON endpoint
+  server.on("/led/off", HTTP_GET, handleLEDOff); // LED OFF endpoint
 
   // Start the web server
   server.begin();
@@ -77,20 +78,18 @@ void handleRoot() {
   server.send(200, "text/html", html);
 }
 
-// Handle LED control requests ("/led/on" or "/led/off")
-void handleLED() {
-  String state = server.pathArg(0); // Extract state from the URL path
-
-  if (state == "on") {
-    digitalWrite(LED_PIN, HIGH);  // Turn ON the LED
-    server.send(200, "text/plain", "LED is ON");
-  } 
-  else if (state == "off") {
-    digitalWrite(LED_PIN, LOW);   // Turn OFF the LED
-    server.send(200, "text/plain", "LED is OFF");
-  } 
-  else {
-    server.send(400, "text/plain", "Invalid request: Use '/led/on' or '/led/off'");
-  }
+// Handle the "/led/on" request
+void handleLEDOn() {
+  digitalWrite(LED_PIN, HIGH);  // Turn ON the LED
+  server.send(200, "text/plain", "LED is ON");
 }
 
+// Handle the "/led/off" request
+void handleLEDOff() {
+  digitalWrite(LED_PIN, LOW);   // Turn OFF the LED
+  server.send(200, "text/plain", "LED is OFF");
+}
+
+// Please follow these steps
+// 1. "pio run --target uploadfs" to upload the SPIFFS (SPI Flash File System) data to the ESP32's flash memory
+// 2. Upload the main.cpp code
