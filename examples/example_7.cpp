@@ -8,7 +8,6 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include <WebServer.h>
-#include <FS.h>
 #include <SPIFFS.h>
 
 const char* ssid = "Galaxy A33 5G CFB1";
@@ -24,78 +23,67 @@ constexpr int PWM_RESOLUTION = 8;
 void connectToWiFi();
 void handleRoot();
 void handleBrightness();
-void handleCSS();
-void handleJS();
+void handleFile(const char* path, const char* type);
 
 void setup() {
-  Serial.begin(115200);
-  ledcSetup(PWM_CHANNEL, PWM_FREQUENCY, PWM_RESOLUTION);
-  ledcAttachPin(LED_PIN, PWM_CHANNEL);
+    Serial.begin(115200);
 
-  connectToWiFi();
+    // Initialize PWM for LED
+    ledcSetup(PWM_CHANNEL, PWM_FREQUENCY, PWM_RESOLUTION);
+    ledcAttachPin(LED_PIN, PWM_CHANNEL);
 
-  if (!SPIFFS.begin()) {
-    Serial.println("Failed to mount SPIFFS filesystem.");
-    return;
-  }
+    connectToWiFi();
 
-  server.on("/", HTTP_GET, handleRoot);
-  server.on("/style.css", HTTP_GET, handleCSS);
-  server.on("/script.js", HTTP_GET, handleJS);
-  server.on("/set_brightness", HTTP_GET, handleBrightness);
+    if (!SPIFFS.begin(true)) {
+        Serial.println("SPIFFS mount failed.");
+        return;
+    }
 
-  server.begin();
-  Serial.println("Server started!");
+    server.on("/", handleRoot);
+    server.on("/style.css", [](){ handleFile("/style.css", "text/css"); });
+    server.on("/script.js", [](){ handleFile("/script.js", "application/javascript"); });
+    server.on("/set_brightness", handleBrightness);
+
+    server.begin();
+    Serial.println("Server started!");
 }
 
 void loop() {
-  server.handleClient();
+    server.handleClient();
 }
 
 void connectToWiFi() {
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("\nConnected to Wi-Fi!");
-  Serial.print("IP Address: ");
-  Serial.println(WiFi.localIP());
+    WiFi.begin(ssid, password);
+    Serial.print("Connecting to WiFi");
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(500);
+        Serial.print(".");
+    }
+    Serial.println("\nConnected!");
+    Serial.print("IP Address: ");
+    Serial.println(WiFi.localIP());
 }
 
 void handleRoot() {
-  File file = SPIFFS.open("/index.html", "r");
-  if (!file) {
-    server.send(500, "text/plain", "Failed to open index.html");
-    return;
-  }
-  server.streamFile(file, "text/html");
-  file.close();
+    handleFile("/index.html", "text/html");
+}
+
+void handleFile(const char* path, const char* type) {
+    File file = SPIFFS.open(path);
+    if (!file) {
+        server.send(404, "text/plain", "File not found");
+        return;
+    }
+    server.streamFile(file, type);
+    file.close();
 }
 
 void handleBrightness() {
-  String value = server.arg("value");
-  int brightness = constrain(value.toInt(), 0, 255);
-  ledcWrite(PWM_CHANNEL, brightness);
-  server.send(200, "text/plain", "Brightness set to: " + String(brightness));
-}
-
-void handleCSS() {
-  File file = SPIFFS.open("/style.css", "r");
-  if (!file) {
-    server.send(500, "text/plain", "Failed to open style.css");
-    return;
-  }
-  server.streamFile(file, "text/css");
-  file.close();
-}
-
-void handleJS() {
-  File file = SPIFFS.open("/script.js", "r");
-  if (!file) {
-    server.send(500, "text/plain", "Failed to open script.js");
-    return;
-  }
-  server.streamFile(file, "application/javascript");
-  file.close();
+    if (server.hasArg("value")) {
+        int brightness = constrain(server.arg("value").toInt(), 0, 255);
+        ledcWrite(PWM_CHANNEL, brightness);
+        server.send(200, "text/plain", "Brightness set to " + String(brightness));
+    } else {
+        server.send(400, "text/plain", "Missing value");
+    }
 }

@@ -29,52 +29,54 @@ void setBrightnessPWM(int brightness);
 void setBrightnessDAC(int brightness);
 
 void setup() {
-    // Initialize serial communication for debugging
-    Serial.begin(115200);
-    
-    // Configure LED PWM functionality
-    ledcSetup(pwmChannel, pwmFrequency, pwmResolution);
-    ledcAttachPin(PWM_PIN, pwmChannel);
+  // Initialize serial communication for debugging
+  Serial.begin(115200);
+  
+  // Configure LED PWM functionality
+  ledcSetup(pwmChannel, pwmFrequency, pwmResolution);
+  ledcAttachPin(PWM_PIN, pwmChannel);
+  ledcWrite(pwmChannel, 255);
 
-    // Inform the user
-    Serial.println("Enter 1, 2, or 3 to set LED brightness:");
-    Serial.println("1 - 75%, 2 - 50%, 3 - 25%");
+  // Inform the user
+  Serial.println("Enter 1, 2, or 3 to set LED brightness:");
+  Serial.println("1 - 75%, 2 - 50%, 3 - 25%");
 }
 
 void loop() {
-    if (Serial.available() > 0) {
-        int brightnessLevel = Serial.parseInt();  // Read the user input
-        
-        if (brightnessLevel == 1) {
-            // Set 75% brightness using PWM
-            setBrightnessPWM(BRIGHT_75);
-            setBrightnessDAC(BRIGHT_75);
-            Serial.println("Brightness set to 75%");
-        } 
-        else if (brightnessLevel == 2) {
-            // Set 50% brightness using PWM
-            setBrightnessPWM(BRIGHT_50);
-            setBrightnessDAC(BRIGHT_50);
-            Serial.println("Brightness set to 50%");
-        } 
-        else if (brightnessLevel == 3) {
-            // Set 25% brightness using PWM
-            setBrightnessPWM(BRIGHT_25);
-            setBrightnessDAC(BRIGHT_25);
-            Serial.println("Brightness set to 25%");
-        }
-        else {
-            Serial.println("Invalid input. Enter 1, 2, or 3.");
-        }
-    }
+  if (Serial.available() > 0) {
+      int brightnessLevel = Serial.parseInt();  // Read the user input
+      
+      if (brightnessLevel == 1) {
+          // Set 75% brightness using PWM
+          setBrightnessPWM(BRIGHT_75);
+          setBrightnessDAC(BRIGHT_75);
+          Serial.println("Brightness set to 75%");
+      } 
+      else if (brightnessLevel == 2) {
+          // Set 50% brightness using PWM
+          setBrightnessPWM(BRIGHT_50);
+          setBrightnessDAC(BRIGHT_50);
+          Serial.println("Brightness set to 50%");
+      } 
+      else if (brightnessLevel == 3) {
+          // Set 25% brightness using PWM
+          setBrightnessPWM(BRIGHT_25);
+          setBrightnessDAC(BRIGHT_25);
+          Serial.println("Brightness set to 25%");
+      }
+      else {
+          Serial.println("Invalid input. Enter 1, 2, or 3.");
+      }
+  }
 }
 
 // Function to control brightness using PWM
 void setBrightnessPWM(int brightness) {
-    ledcWrite(pwmChannel, brightness);  // Set the PWM duty cycle
+  ledcWrite(pwmChannel, brightness);  // Set the PWM duty cycle
 }
 
 // Function to control brightness using DAC
 void setBrightnessDAC(int brightness) {
-    dacWrite(DAC_PIN, brightness);  // Write the value to the DAC pin
+  dacWrite(DAC_PIN, brightness);  // Write the value to the DAC pin
 }
+

@@ -1,1 +1,82 @@
-/* Paste you style.css file here */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f4f7;
+    color: #333;
+    text-align: center;
+    margin: 0;
+    padding: 40px 20px;
+}
+
+h1 {
+    font-size: 2em;
+    margin-bottom: 10px;
+}
+
+h2 {
+    margin-top: 30px;
+    font-size: 1.5em;
+}
+
+p {
+    font-size: 1.2em;
+}
+
+#ldrValue {
+    font-weight: bold;
+    font-size: 1.5em;
+    color: #2f8bff;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    margin: 10px 5px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+#getValueBtn {
+    background-color: #4CAF50;
+    color: white;
+}
+
+#getValueBtn:hover {
+    background-color: #45a049;
+}
+
+#saveBtn {
+    background-color: #2196F3;
+    color: white;
+}
+
+#saveBtn:hover {
+    background-color: #1976D2;
+}
+
+#clearBtn {
+    background-color: #f44336;
+    color: white;
+}
+
+#clearBtn:hover {
+    background-color: #d32f2f;
+}
+
+ul {
+    list-style-type: none;
+    padding-left: 0;
+    max-height: 300px;
+    overflow-y: auto;
+    margin-top: 10px;
+}
+
+li {
+    background: #fff;
+    padding: 5px 10px;
+    margin: 3px 0;
+    border-radius: 5px;
+    text-align: left;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}

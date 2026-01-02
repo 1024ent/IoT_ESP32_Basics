@@ -1,9 +1,12 @@
-document.getElementById('btnOn').addEventListener('click', () => sendRequest('on'));
-document.getElementById('btnOff').addEventListener('click', () => sendRequest('off'));
-
-function sendRequest(state) {
+function setLED(state) {
   fetch(`/led/${state}`)
     .then(response => response.text())
-    .then(data => console.log(data))
-    .catch(err => console.error('Error:', err));
+    .then(message => {
+      document.getElementById("status").textContent =
+        "LED Status: " + message;
+    })
+    .catch(() => {
+      document.getElementById("status").textContent =
+        "Connection error";
+    });
 }

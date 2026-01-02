@@ -7,78 +7,117 @@
  **/
 #include <Arduino.h>
 
-// Define the function
-void Serial_LED_Control();
+// Function Declarations
+void readSerialCommand();
+void blinkLED();
 
-// Define pin numbers 
-static const int LED1 = 13;
-static const int LED2 = 12;
-static const int LED3 = 14;
+// ===== LED PINS =====
+const int LED1 = 13;
+const int LED2 = 12;
+const int LED3 = 14;
 
-// Define variables
-int pin = 0;                // Store the currently selected LED pin
-int delayDuration = 1000;   // Default delay duration in milliseconds
+// ===== VARIABLES =====
+int selectedPin = -1;        // Selected LED pin
+int blinkDelay = 1000;       // Blink delay in milliseconds
+bool blinking = false;       // Are we blinking?
 
+unsigned long lastTime = 0;
+bool ledState = LOW;
+
+int blinkCount = 0;          // Counts LED toggles
+const int MAX_BLINKS = 10;   // 5 blinks = ON + OFF = 10 toggles
+
+// ===== SETUP =====
 void setup() {
-    pinMode(LED1, OUTPUT);
-    pinMode(LED2, OUTPUT);
-    pinMode(LED3, OUTPUT);
-    Serial.begin(115200);
-    Serial.println("System Initialized. Waiting for commands...");
+  pinMode(LED1, OUTPUT);
+  pinMode(LED2, OUTPUT);
+  pinMode(LED3, OUTPUT);
+
+  digitalWrite(LED1, LOW);
+  digitalWrite(LED2, LOW);
+  digitalWrite(LED3, LOW);
+
+  Serial.begin(115200);
+
+  Serial.println("=== Serial LED Control ===");
+  Serial.println("Enter LED number (1, 2, or 3):");
 }
 
+// ===== LOOP =====
 void loop() {
-    Serial_LED_Control();
+  readSerialCommand();
+  blinkLED();
 }
 
-// Function
-void Serial_LED_Control() {
-    if (Serial.available()) {
-        // Prompt for LED number
-        Serial.println("Please enter the LED number (1-3) to turn on:");
-        while (!Serial.available()); // Wait for input
-        String ledInput = Serial.readStringUntil('\n');
-        int ledNumber = ledInput.toInt();
+// ===== READ SERIAL INPUT =====
+void readSerialCommand() {
+  if (!Serial.available()) return;
 
-        // Validate LED number and set the pin
-        if (ledNumber == 1) pin = LED1;
-        else if (ledNumber == 2) pin = LED2;
-        else if (ledNumber == 3) pin = LED3;
-        else {
-            Serial.println("Invalid LED number. Please enter 1, 2, or 3.");
-            return;
-        }
+  int value = Serial.parseInt();
 
-        // Turn on the selected LED
-        digitalWrite(pin, HIGH);
-        Serial.print("LED ");
-        Serial.print(ledNumber);
-        Serial.println(" turned on.");
-
-        // Prompt for delay duration
-        Serial.println("Please enter the delay duration (in milliseconds):");
-        while (!Serial.available()); // Wait for input
-        String delayInput = Serial.readStringUntil('\n');
-        int newDelayDuration = delayInput.toInt();
-
-        if (newDelayDuration <= 0) {
-            Serial.println("Invalid delay duration. Please enter a positive number.");
-            return;
-        }
-
-        // Update delay duration
-        delayDuration = newDelayDuration;
-        Serial.print("Delay duration changed to ");
-        Serial.print(delayDuration);
-        Serial.println(" milliseconds.");
-
-        while(1){
-            // Blink the LED
-            Serial.println("Blinking the selected LED...");
-            digitalWrite(pin, HIGH);
-            delay(delayDuration);
-            digitalWrite(pin, LOW);
-            delay(delayDuration);            
-        }
+  // STEP 1: SELECT LED
+  if (selectedPin == -1) {
+    if (value == 1) selectedPin = LED1;
+    else if (value == 2) selectedPin = LED2;
+    else if (value == 3) selectedPin = LED3;
+    else {
+        Serial.println("Invalid LED. Enter 1, 2, or 3:");
+        return;
     }
+
+    Serial.println("LED selected.");
+    Serial.println("Enter blink delay (ms):");
+    Serial.read();
+    return;
+  }
+
+  // STEP 2: SET DELAY AND START BLINKING
+  if (value <= 0) {
+      Serial.println("Delay must be positive.");
+      return;
+  }
+
+  // Valid delay
+  blinkDelay = value;
+  blinking = true;
+  blinkCount = 0;
+
+  ledState = LOW;
+  digitalWrite(selectedPin, LOW);
+
+  lastTime = millis();
+
+  // Clear any remaining serial characters (newline)
+  while (Serial.available()) {
+      Serial.read();
+  }
+
+  Serial.println("Blinking 5 times...");
+
+  Serial.read();
+}
+
+// ===== BLINK LOGIC (NON-BLOCKING) =====
+void blinkLED() {
+  if (!blinking) return;
+
+  unsigned long currentTime = millis();
+
+  if (currentTime - lastTime >= blinkDelay) {
+    lastTime = currentTime;
+
+    ledState = !ledState;
+    digitalWrite(selectedPin, ledState);
+    blinkCount++;
+
+    // STOP AFTER 5 BLINKS
+    if (blinkCount >= MAX_BLINKS) {
+      blinking = false;
+      digitalWrite(selectedPin, LOW);
+      selectedPin = -1;
+
+      Serial.println("Done.");
+      Serial.println("Enter LED number (1, 2, or 3):");
+    }
+  }
 }

@@ -25,11 +25,14 @@ void setup() {
     pinMode(LED1, OUTPUT);
     pinMode(LED2, OUTPUT);
     pinMode(LED3, OUTPUT);
+    
     Serial.begin(115200);
 }
 
 void loop() {
-    blinking_led_3();
+  blinking_led_1();
+  blinking_led_2();
+  blinking_led_3();
 }
 
 // Function
@@ -43,9 +46,9 @@ void blinking_led_1() {
         digitalWrite(LED1, LOW);
         delay(short_delay);
     }
-    while(1){
+    // while(1){
 
-    }
+    // }
 }
 
 void blinking_led_2() {
@@ -61,9 +64,9 @@ void blinking_led_2() {
 
         count++; // Increment count
     } while (count < 5);
-    while(1){
+    // while(1){
 
-    }
+    // }
 }
 
 void blinking_led_3() {
@@ -79,7 +82,7 @@ void blinking_led_3() {
 
         count++; // Increment count
     }
-    while(1){
+    // while(1){
 
-    }
+    // }
 }

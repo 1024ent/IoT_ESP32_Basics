@@ -3,13 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ESP32 LDR Value</title>
-    <link rel="stylesheet" href="style.css"> <!-- Optional CSS for styling -->
+    <title>ESP32 LDR Monitor</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>ESP32 LDR Value</h1>
-    <p>Current LDR Value: <span id="ldrValue">Loading...</span></p>
-    <button onclick="fetchLDRValue()">Get LDR Value</button>
-    <script src="script.js"></script> <!-- JavaScript file -->
+    <main>
+        <h1>ESP32 LDR Monitor</h1>
+        <p>Current LDR Value: <span id="ldrValue">Loading...</span></p>
+
+        <div class="buttons">
+            <button id="getValueBtn">Get LDR Value</button>
+            <button id="saveBtn">Save Data</button>
+            <button id="clearBtn">Clear Data</button>
+        </div>
+
+        <h2>Recorded Values:</h2>
+        <ul id="recordedValues"></ul>
+    </main>
+
+    <script src="script.js"></script>
 </body>
 </html>

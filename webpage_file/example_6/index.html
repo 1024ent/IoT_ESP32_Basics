@@ -2,13 +2,40 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <title>ESP32 LED Control</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LED Control</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 50px;
+    }
+
+    button {
+      width: 120px;
+      height: 40px;
+      font-size: 16px;
+      margin: 10px;
+      cursor: pointer;
+    }
+
+    #status {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
+
   <h1>ESP32 LED Control</h1>
-  <button id="btnOn">Turn ON</button>
-  <button id="btnOff">Turn OFF</button>
+
+  <button onclick="setLED('on')">ON</button>
+  <button onclick="setLED('off')">OFF</button>
+
+  <div id="status">LED Status: Unknown</div>
+
   <script src="script.js"></script>
 </body>
 </html>

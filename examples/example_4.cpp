@@ -25,9 +25,9 @@ void digital_input_example();  // Handles digital input for LED control
 #define long_delay pdMS_TO_TICKS(10000)
 
 // Define pin numbers for LEDs, switch, and LDR
-constexpr int led1_pin = 14;  // LED 1 pin
+constexpr int led1_pin = 13;  // LED 1 pin
 constexpr int led2_pin = 12;  // LED 2 pin
-constexpr int switch_pin = 13; // Switch input pin
+constexpr int switch_pin = 33; // Switch input pin
 
 // Define variables
 int switch_state = 0;  // Variable to store the state of the switch

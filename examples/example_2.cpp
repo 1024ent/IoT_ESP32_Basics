@@ -29,77 +29,78 @@ void Fade_LED_PWM();
 void Smooth_Fade_LED_PWM();
 
 void setup() {
-    // Initialize serial communication for debugging
-    Serial.begin(115200);
+  // Initialize serial communication for debugging
+  Serial.begin(115200);
 
-    // Configure LED PWM functionality
-    ledcSetup(pwmChannel, pwmFrequency, pwmResolution);
+  // Configure LED PWM functionality
+  ledcSetup(pwmChannel, pwmFrequency, pwmResolution);
 
-    // Attach the LED pin to the PWM channel
-    ledcAttachPin(PWM_PIN, pwmChannel);
+  // Attach the LED pin to the PWM channel
+  ledcAttachPin(PWM_PIN, pwmChannel);
+  ledcWrite(pwmChannel, 255);
 
-    Serial.println("...Starting Your Program...");
+  Serial.println("...Starting Your Program...");
 }
 
 void loop() {
-    Smooth_Fade_LED_PWM();  // Fade using 
+  Smooth_Fade_LED_PWM();  // Fade using 
 }
 
 // Function for fading LED using DAC
 void Fade_LED_DAC() {
-    Serial.println("Starting LED fade using DAC...");
+  Serial.println("Starting LED fade using DAC...");
 
-    // Gradually increase the LED brightness
-    for (int i = 0; i <= 255; i++) {
-        dacWrite(DAC_PIN, i);       // Write the value to DAC pin
-        delay(SHORT_DELAY);         // Small delay to see the fade effect
-    }
+  // Gradually increase the LED brightness
+  for (int i = 0; i <= 255; i++) {
+      dacWrite(DAC_PIN, i);       // Write the value to DAC pin
+      delay(SHORT_DELAY);         // Small delay to see the fade effect
+  }
 
-    // Gradually decrease the LED brightness
-    for (int i = 255; i >= 0; i--) {
-        dacWrite(DAC_PIN, i);       // Write the value to DAC pin
-        delay(SHORT_DELAY);         // Small delay to see the fade effect
-    }
+  // Gradually decrease the LED brightness
+  for (int i = 255; i >= 0; i--) {
+      dacWrite(DAC_PIN, i);       // Write the value to DAC pin
+      delay(SHORT_DELAY);         // Small delay to see the fade effect
+  }
 }
 
 // Function for fading LED using PWM
 void Fade_LED_PWM() {
-    Serial.println("Starting LED fade using PWM...");
+  Serial.println("Starting LED fade using PWM...");
 
-    // Gradually increase the LED brightness
-    for (int dutyCycle = 0; dutyCycle <= 255; dutyCycle++) {
-        ledcWrite(pwmChannel, dutyCycle); // Set PWM duty cycle
-        delay(SHORT_DELAY);               // Small delay for fade effect
-    }
+  // Gradually increase the LED brightness
+  for (int dutyCycle = 0; dutyCycle <= 255; dutyCycle++) {
+    ledcWrite(pwmChannel, dutyCycle); // Set PWM duty cycle
+    delay(SHORT_DELAY);               // Small delay for fade effect
+  }
 
-    // Gradually decrease the LED brightness
-    for (int dutyCycle = 255; dutyCycle >= 0; dutyCycle--) {
-        ledcWrite(pwmChannel, dutyCycle); // Set PWM duty cycle
-        delay(SHORT_DELAY);               // Small delay for fade effect
-    }
+  // Gradually decrease the LED brightness
+  for (int dutyCycle = 255; dutyCycle >= 0; dutyCycle--) {
+    ledcWrite(pwmChannel, dutyCycle); // Set PWM duty cycle
+    delay(SHORT_DELAY);               // Small delay for fade effect
+  }
 }
 
 // Gamma Correct Function
 int gammaCorrect(int value) {
-    float gamma = 2.2; // Common gamma value
-    return pow((float)value / 255.0, gamma) * 255.0;
+  float gamma = 2.2; // Common gamma value
+  return pow((float)value / 255.0, gamma) * 255.0;
 }
 
 // Function for fading LED using PWM with gamma correction
 void Smooth_Fade_LED_PWM(){
-    Serial.println("Starting LED fade using PWM with gamma correction...");
+  Serial.println("Starting LED fade using PWM with gamma correction...");
 
-    // Gradually increase the LED brightness
-    for (int dutyCycle = 0; dutyCycle <= 255; dutyCycle++) {
-        int correctedDuty = gammaCorrect(dutyCycle); // Apply gamma correction
-        ledcWrite(pwmChannel, correctedDuty);        // Set PWM duty cycle
-        delay(SHORT_DELAY);                          // Small delay for fade effect
-    }
+  // Gradually increase the LED brightness
+  for (int dutyCycle = 0; dutyCycle <= 255; dutyCycle++) {
+      int correctedDuty = gammaCorrect(dutyCycle); // Apply gamma correction
+      ledcWrite(pwmChannel, correctedDuty);        // Set PWM duty cycle
+      delay(SHORT_DELAY);                          // Small delay for fade effect
+  }
 
-    // Gradually decrease the LED brightness
-    for (int dutyCycle = 255; dutyCycle >= 0; dutyCycle--) {
-        int correctedDuty = gammaCorrect(dutyCycle); // Apply gamma correction
-        ledcWrite(pwmChannel, correctedDuty);        // Set PWM duty cycle
-        delay(SHORT_DELAY);                          // Small delay for fade effect
-    }
+  // Gradually decrease the LED brightness
+  for (int dutyCycle = 255; dutyCycle >= 0; dutyCycle--) {
+      int correctedDuty = gammaCorrect(dutyCycle); // Apply gamma correction
+      ledcWrite(pwmChannel, correctedDuty);        // Set PWM duty cycle
+      delay(SHORT_DELAY);                          // Small delay for fade effect
+  }
 }
